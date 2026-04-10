@@ -6,7 +6,7 @@ pipeline{
     stages{ 
         stage("Clone code from GitHub"){ 
             steps{ 
-                git url: "https://github.com/DevMadhup/wanderlust.git", branch: "devops" 
+                git url: "https://github.com/devopsyogesh/wanderlust-ci-cd-devsecops.git", branch: "devops" 
             } 
         } 
         stage("SonarQube Quality Analysis"){ 
