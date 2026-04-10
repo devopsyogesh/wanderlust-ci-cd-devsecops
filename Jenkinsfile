@@ -1,0 +1,44 @@
+pipeline{ 
+    agent any 
+    environment{ 
+        SONAR_HOME = tool "Sonar" 
+    } 
+    stages{ 
+        stage("Clone code from GitHub"){ 
+            steps{ 
+                git url: "https://github.com/devopsyogesh/wanderlust-ci-cd-devsecops.git", branch: "devops" 
+            } 
+        } 
+        stage("SonarQube Quality Analysis"){ 
+            steps{ 
+                withSonarQubeEnv("Sonar"){ 
+                    sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=wanderlust -Dsonar.projectKey=wanderlust -Dsonar.sources=." 
+                } 
+            } 
+        } 
+        stage("OWASP Dependency Check"){  
+            steps{  
+                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dc'  
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'  
+            }  
+        }  
+        stage("Sonar Quality Gate Scan"){  
+            steps{  
+                timeout(time: 2, unit: "MINUTES"){  
+                    waitForQualityGate abortPipeline: false  
+                }  
+            }  
+        }  
+        stage("Trivy File System Scan"){  
+            steps{  
+                sh "trivy fs . --format table -o trivy-fs-report.html"  
+            }  
+        } 
+        stage("Deploy Using Docker Compose"){  
+            steps{  
+                sh "docker-compose down --remove-orphans"
+                sh "docker-compose up -d"  
+            }  
+        } 
+    } 
+} 
