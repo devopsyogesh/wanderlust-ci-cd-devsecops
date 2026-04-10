@@ -36,7 +36,7 @@ pipeline{
         } 
         stage("Deploy Using Docker Compose"){  
             steps{  
-                sh "docker compose down --remove-orphans"
+                sh "docker-compose down --remove-orphans"
                 sh "docker-compose up -d"  
             }  
         } 
